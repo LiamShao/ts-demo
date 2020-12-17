@@ -12,7 +12,6 @@ export interface HtmlAnalyzer {
 class Crawler {
   private filePath = path.resolve(__dirname, '../data/movie.json');
   constructor(private url: string, private analyzer: HtmlAnalyzer) {
-    console.log(this.url);
     this.initProcess();
   }
 
