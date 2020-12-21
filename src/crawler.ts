@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import agent from 'superagent';
-import Analyzer from './analyzer';
 // 测试组合模式
 // import Bee from './newAnalyzer';
 
@@ -32,7 +31,4 @@ class Crawler {
   }
 }
 
-const url = 'https://movie.douban.com/top250';
-const analyzer = Analyzer.getInstance();
-// const analyzer = new Bee();
-new Crawler(url, analyzer);
+export default Crawler;
