@@ -80,20 +80,80 @@ console.log(e.getName());
 // 对方法进行装饰
 // 普通方法 target 对应的是类的 prototype
 // 静态方法 target 对应的是类的构造函数
-function testDecorator5(
+function methodDecorator5(
   target: any,
   key: string,
   descriptor: PropertyDescriptor
 ) {}
 
-class Test5 {
-  constructor(public name: string) {}
+// 属性装饰器没有描述器
+function attrDecorator(target: any, key: string) {
+  // 这里修改的是原型的age 而不是实例的属性
+  target[key] = 22;
+}
 
-  @testDecorator5
+// 参数装饰器: 原型 方法名 参数位置
+function paramDecorator(target: any, method: string, paramIndex: number) {
+  console.log('>>>p', target, method, paramIndex);
+}
+
+class Test5 {
+  @attrDecorator
+  age = 18;
+
+  constructor(private _name: string) {}
+
+  @methodDecorator5
   getName() {
-    return this.name;
+    return this._name;
   }
 
-  @testDecorator5
+  @methodDecorator5
   static getAge() {}
+
+  get name() {
+    return this._name;
+  }
+  // getter和setter访问器的装饰器和普通方法一样，但是getter和setter同时只能有一个使用装饰
+  @methodDecorator5
+  set name(name: string) {
+    this._name = name;
+  }
+
+  getGender(name: string, @paramDecorator age: number) {
+    console.log('>>>', name, age);
+  }
 }
+const f = new Test5('shaooo');
+console.log(f.age);
+// 访问原型的属性
+console.log((f as any).__proto__.age);
+console.log(f.getGender('lucas', 28));
+
+// 使用装饰器+工厂模式实现 try catch的封装
+function catchError(msg: string) {
+  return function (target: any, key: string, descriptor: PropertyDescriptor) {
+    const fn = descriptor.value;
+    descriptor.value = function () {
+      try {
+        fn();
+      } catch (e) {
+        console.log(msg);
+      }
+    };
+  };
+}
+const userInfo: any = undefined;
+class Test6 {
+  @catchError('name不存在')
+  getName() {
+    return userInfo.name;
+  }
+
+  @catchError('age不存在')
+  getAge() {
+    return userInfo.age;
+  }
+}
+const g = new Test6();
+console.log(g.getName(), g.getAge());
